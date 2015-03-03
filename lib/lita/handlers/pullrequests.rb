@@ -1,3 +1,5 @@
+# Example
+
 module Lita
   module Handlers
     class Pullrequests < Handler
