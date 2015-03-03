@@ -14,6 +14,8 @@ describe Lita::Handlers::Pullrequests, lita_handler: true do
   it { is_expected.to route_command("all pull requests").to(:list_all_pull_requests) }
   it { is_expected.to route_command("summarize pull requests").to(:list_all_pull_requests) }
 
+  it { is_expected.to_not route_command("all pull requests").to(:get_random_pr) }
+
   it "can respond with a random pull request" do
     send_command("give me something to review")
     expect(replies).to_not be_empty

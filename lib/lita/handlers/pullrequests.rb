@@ -6,19 +6,19 @@ module Lita
       config :review_label, type: String, required: false
       config :merge_label,  type: String, required: false
 
-      route(/(pull request( me)?)|(give me something to review)/, :get_random_pr, command: true, help: {
+      route(/^(pull request( me)?)|(give me something to review)$/, :get_random_pr, command: true, help: {
         "give me something to review" => "Shows you a random pull request that needs reviewing.",
         "pull request (me)" => "Shows you a random pull request that needs reviewing."
       })
 
-      route(/(summarize|all) pull requests/, :list_all_pull_requests, command: true, help: {
+      route(/^(summarize|all) pull requests$/, :list_all_pull_requests, command: true, help: {
         "(summarize|all) pull requests" => "Lists all pull requests that need action."
       })
 
 
       # Helper method
       def truncate(str, truncate_at, options = {})
-        return dup unless str.length > truncate_at
+        return str unless str.length > truncate_at
 
         omission = options[:omission] || '...'
         length_with_room_for_omission = truncate_at - omission.length
