@@ -1,7 +1,7 @@
 module Lita
   module Handlers
     class Pullrequests < Handler
-      config :access_token, type: String, required: true # bdaf08383ca76c58ab779ab8ff1ad7f6dc5bb3a4
+      config :access_token, type: String, required: true
       config :repo,         type: String, required: true
       config :review_label, type: String, required: false
       config :merge_label,  type: String, required: false

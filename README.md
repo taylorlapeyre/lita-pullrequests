@@ -18,7 +18,7 @@ Add the following configuration lines to your `lita_config`:
 config.handlers.pullrequests.access_token = "a-github-api-access-token"
 config.handlers.pullrequests.repo = "username/reponame"
 config.handlers.pullrequests.review_label = "title of a label that represents a pr ready for review"
-config.handlers.pullrequests.review_label = "title of a label that represents a pr ready for merge"
+config.handlers.pullrequests.merge_label  = "title of a label that represents a pr ready for merge"
 ```
 
 ## Usage
