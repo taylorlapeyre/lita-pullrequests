@@ -1,6 +1,6 @@
 # lita-pullrequests
 
-TODO: Add a description of the plugin.
+A Lita handler to help you keep track of your pull requests.
 
 ## Installation
 
@@ -10,14 +10,26 @@ Add lita-pullrequests to your Lita instance's Gemfile:
 gem "lita-pullrequests"
 ```
 
-
 ## Configuration
 
-TODO: Describe any configuration attributes the plugin exposes.
+Add the following configuration lines to your `lita_config`:
+
+``` ruby
+config.handlers.pullrequests.access_token = "a-github-api-access-token"
+config.handlers.pullrequests.repo = "username/reponame"
+config.handlers.pullrequests.review_label = "title of a label that represents a pr ready for review"
+config.handlers.pullrequests.review_label = "title of a label that represents a pr ready for merge"
+```
 
 ## Usage
 
-TODO: Describe the plugin's features and how to use them.
+```
+> @robot: give me something to review
+...
+
+> @robot: summarize pull requests
+....
+```
 
 ## License
 
