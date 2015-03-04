@@ -14,6 +14,10 @@ describe Lita::Handlers::Pullrequests, lita_handler: true do
   it { is_expected.to route_command("all pull requests").to(:list_all_pull_requests) }
   it { is_expected.to route_command("summarize pull requests").to(:list_all_pull_requests) }
   it { is_expected.to route_command("set pull requests reminder for 0 20 * * 1-5").to(:set_reminder) }
+  it { is_expected.to route_command("set pull request reminder for 0 20 * * 1-5").to(:set_reminder) }
+  it { is_expected.to route_command("stop reminding me about pull requests").to(:remove_reminder) }
+  it { is_expected.to route_command("show pull requests reminder").to(:show_reminder) }
+  it { is_expected.to route_command("show pull request reminder").to(:show_reminder) }
 
   it { is_expected.to_not route_command("all pull requests").to(:get_random_pr) }
 
@@ -33,5 +37,19 @@ describe Lita::Handlers::Pullrequests, lita_handler: true do
   it "can schedule a reminder" do
     send_command("set pull requests reminder for 0 20 * * 1-5")
     expect(replies.last).to match /0 20 \* \* 1\-5/
+  end
+
+  it "can stop reminding you" do
+    send_command("set pull requests reminder for 0 20 * * 1-5")
+    expect(replies.last).to match /0 20 \* \* 1\-5/
+    send_command("stop reminding me about pull requests")
+    expect(replies.last).to eq "okay, I turned off your reminder."
+  end
+
+  it "can tell you when it will remind you next" do
+    send_command("set pull requests reminder for 0 20 * * 1-5")
+    expect(replies.last).to match /0 20 \* \* 1\-5/
+    send_command("show pull requests reminder")
+    expect(replies.last).to match /I will remind you/
   end
 end

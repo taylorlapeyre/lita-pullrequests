@@ -22,8 +22,16 @@ module Lita
         "(summarize|all) pull requests" => "Lists all pull requests that need action."
       })
 
-      route(/^set pull requests reminder for (.*)$/, :set_reminder, command: true, help: {
-        "set pull requests reminder for CRON EXPRESSION" => "Sets a cron task that will trigger a pr summary."
+      route(/^set pull request(s)? reminder for (.*)$/, :set_reminder, command: true, help: {
+        "set pull request(s)? reminder for CRON EXPRESSION" => "Sets a cron task that will trigger a pr summary."
+      })
+
+      route(/^stop reminding me about pull requests$/, :remove_reminder, command: true, help: {
+        "stop reminding me about pull requests" => "Shows you info about your next pull request reminder."
+      })
+
+      route(/^show pull request(s)? reminder$/, :show_reminder, command: true, help: {
+        "show pull request(s) reminder" => "Shows you info about your next pull request reminder."
       })
 
       def remember_reminder(payload)
@@ -99,7 +107,7 @@ module Lita
       end
 
       def set_reminder(chat)
-        input = chat.matches[0][0].split(" ")
+        input = chat.matches[0][1].split(" ")
         cron_expression = input[0..4].join(" ")
         job = SCHEDULER.cron cron_expression do |job|
           list_all_pull_requests(chat)
@@ -113,6 +121,28 @@ module Lita
         }.to_json)
 
         chat.reply("I will post a pull request summary according to this cron: #{cron_expression}")
+      end
+
+      def show_reminder(chat)
+        reminder = redis.hgetall(REDIS_KEY)["reminder-info"]
+        if reminder
+          info = MultiJson.load(reminder)
+          chat.reply "I will remind you in channel #{info["room"]} at #{info["cron_expression"]}"
+        else
+          chat.reply "Your reminder is not set."
+        end
+      end
+
+      def remove_reminder(chat)
+        reminder = redis.hgetall(REDIS_KEY)["reminder-info"]
+        if reminder
+          info = MultiJson.load(reminder)
+          SCHEDULER.unschedule(info["j_id"])
+          redis.hdel(REDIS_KEY, "reminder-info")
+          chat.reply "okay, I turned off your reminder."
+        else
+          chat.reply "Your reminder is not set."
+        end
       end
     end
 
