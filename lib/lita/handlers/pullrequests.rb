@@ -74,21 +74,21 @@ module Lita
       end
 
       def list_all_pull_requests(chat)
-        response = ":heavy_exclamation_mark: Pull Requests that need review:\n"
+        response = ":heavy_exclamation_mark: *Pull Requests that need review*:\n"
 
         response += pulls_that_need_reviews.map do |pr|
           title, user = pr["title"], pr["user"]["login"]
           url = pr["pull_request"]["html_url"]
-          "- #{title} - #{user} \n  #{url}"
-        end.join("\n")
+          "- _#{title}_ - #{user} \n    #{url}"
+        end.join("\n\n")
 
-        response += "\n\n:white_check_mark: Pull Requests that are ready for merging:\n"
+        response += "\n\n\n:white_check_mark: *Pull Requests that are ready for merging*:\n"
 
         response += pulls_that_need_merging.map do |pr|
           title, user = pr["title"], pr["user"]["login"]
           url = pr["pull_request"]["html_url"]
-          "- #{title} - #{user} \n  #{url}"
-        end.join("\n")
+          "- _#{title}_ - #{user} \n    #{url}"
+        end.join("\n\n")
 
         chat.reply(response)
       end
