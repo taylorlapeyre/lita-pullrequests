@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "lita-pullrequests"
-  spec.version       = "0.0.5"
+  spec.version       = "0.0.6"
   spec.authors       = ["Taylor Lapeyre"]
   spec.email         = ["taylorlapeyre@gmail.com"]
   spec.description   = %q{A Lita handler to help you keep track of your pull requests.}

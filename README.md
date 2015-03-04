@@ -1,6 +1,6 @@
 # lita-pullrequests
 
-A Lita handler to help you keep track of your pull requests. It can automatically post in your channels and tell you about which pull requests need attention.
+A Lita handler to help you keep track of your pull requests. It can automatically post in your channels and tell you about which pull requests need attention in all of your repositories.
 
 This means that you can mark some pull requests as needing attention, and your Lita bot will automatically know about them and remind you to address them whenever you tell it to.
 
@@ -18,7 +18,7 @@ Add the following configuration lines to your `lita_config`:
 
 ``` ruby
 config.handlers.pullrequests.access_token = "a-github-api-access-token"
-config.handlers.pullrequests.repo = "username/reponame"
+config.handlers.pullrequests.repos = ["username/reponame"]
 config.handlers.pullrequests.review_label = "title of a label that represents a pr ready for review"
 config.handlers.pullrequests.merge_label  = "title of a label that represents a pr ready for merge"
 ```
@@ -26,7 +26,7 @@ config.handlers.pullrequests.merge_label  = "title of a label that represents a 
 ## Usage
 
 ```
-> @robot: give me something to review
+> @robot: give me something to review for reponame
 ...
 
 > @robot: summarize pull requests

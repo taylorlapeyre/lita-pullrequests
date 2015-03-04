@@ -4,7 +4,7 @@ module Lita
   module Handlers
     class Pullrequests < Handler
       config :access_token, type: String, required: true
-      config :repo,         type: String, required: true
+      config :repos,        type: Array,  required: true
       config :review_label, type: String, required: false
       config :merge_label,  type: String, required: false
 
@@ -13,9 +13,8 @@ module Lita
       SCHEDULER = Rufus::Scheduler.new
       REDIS_KEY = "pullrequests-cron"
 
-      route(/^(pull request( me)?)|(give me something to review)$/, :get_random_pr, command: true, help: {
-        "give me something to review" => "Shows you a random pull request that needs reviewing.",
-        "pull request (me)" => "Shows you a random pull request that needs reviewing."
+      route(/^give me something to review for (.*)$/, :get_random_pr, command: true, help: {
+        "give me something to review for REPO NAME" => "Shows you a random pull request that needs reviewing.",
       })
 
       route(/^(summarize|all) pull requests$/, :list_all_pull_requests, command: true, help: {
@@ -50,19 +49,28 @@ module Lita
       end
 
       def fetch_pull_requests
-        url    = "https://api.github.com/repos/#{config.repo}/issues"
-        req    = http.get(url, access_token: config.access_token)
-        issues = MultiJson.load(req.body)
-        issues.select { |issue| issue["pull_request"] }
+        config.repos.map do |repo|
+          url    = "https://api.github.com/repos/#{repo}/issues"
+          req    = http.get(url, access_token: config.access_token)
+          issues = MultiJson.load(req.body)
+          issues.select { |issue| issue["pull_request"] }
+        end.flatten
       end
 
       def get_random_pr(chat)
-        pr = pulls_that_need_reviews.sample
-        if pr
-          title, user, url = pr["title"], pr["user"]["login"], pr["pull_request"]["html_url"]
-          chat.reply "_#{title}_ - #{user} \n    #{url}"
+        pulls = pulls_that_need_reviews.group_by { |pr| pr["url"].split("/")[-3] }
+        repo  = chat.matches[0][0]
+
+        if pulls[repo]
+          pr = pulls[repo].sample
+          if pr
+            title, user, url = pr["title"], pr["user"]["login"], pr["pull_request"]["html_url"]
+            chat.reply "_#{title}_ - #{user} \n    #{url}"
+          else
+            chat.reply "No pull requests need reviews right now!"
+          end
         else
-          chat.reply "No pull requests need reviews right now!"
+          chat.reply("I'm not configured for a repo with that name.")
         end
       end
 
