@@ -4,7 +4,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Taylor Lapeyre"]
   spec.email         = ["taylorlapeyre@gmail.com"]
   spec.description   = %q{A Lita handler to help you keep track of your pull requests.}
-  spec.summary       = %q{A Lita handler to help you keep track of your pull requests.}
+  spec.summary       = %q{A Lita handler to help you keep track of your pull requests. It can automatically post in your channels and tell you about which pull requests need attention.}
   spec.homepage      = "https://github.com/taylorlapeyre/lita-pullrequests"
   spec.license       = "MIT"
   spec.metadata      = { "lita_plugin_type" => "handler" }

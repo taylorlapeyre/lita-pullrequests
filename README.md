@@ -1,6 +1,6 @@
 # lita-pullrequests
 
-A Lita handler to help you keep track of your pull requests.
+A Lita handler to help you keep track of your pull requests. It can automatically post in your channels and tell you about which pull requests need attention.
 
 ## Installation
 
@@ -28,6 +28,15 @@ config.handlers.pullrequests.merge_label  = "title of a label that represents a 
 ...
 
 > @robot: summarize pull requests
+....
+
+> @robot: set pull requests reminder for 0 20 * * 1-5
+....
+
+> @robot: show pull requests reminder
+....
+
+> @robot: stop reminding me about pull requests
 ....
 ```
 
