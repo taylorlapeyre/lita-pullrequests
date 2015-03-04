@@ -2,6 +2,8 @@
 
 A Lita handler to help you keep track of your pull requests. It can automatically post in your channels and tell you about which pull requests need attention.
 
+This means that you can mark some pull requests as needing attention, and your Lita bot will automatically know about them and remind you to address them whenever you tell it to.
+
 ## Installation
 
 Add lita-pullrequests to your Lita instance's Gemfile:
