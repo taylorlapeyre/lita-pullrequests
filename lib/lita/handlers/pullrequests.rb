@@ -79,7 +79,7 @@ module Lita
         review_label = config.review_label || "Needs Review"
 
         pulls.select do |pr|
-          pr["labels"].any? { |label| label["name"] == config.review_label }
+          pr["labels"] && pr["labels"].any? { |label| label["name"] == config.review_label }
         end
       end
 
@@ -88,7 +88,7 @@ module Lita
         merge_label = config.merge_label || "Ready To Merge"
 
         pulls.select do |pr|
-          pr["labels"].any? { |label| label["name"] == config.merge_label }
+          pr["labels"] && pr["labels"].any? { |label| label["name"] == config.merge_label }
         end
       end
 
