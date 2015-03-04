@@ -58,16 +58,17 @@ module Lita
       end
 
       def get_random_pr(chat)
-        pulls = pulls_that_need_reviews.group_by { |pr| pr["url"].split("/")[-3] }
+        pulls_by_repo = pulls_that_need_reviews.group_by { |pr| pr["url"].split("/")[-3] }
         repo  = chat.matches[0][0]
 
-        if pulls[repo]
-          pr = pulls[repo].sample
-          if pr
+        if config.repos.map { |r| r.split("/")[1] }.include?(repo)
+          pulls = pulls_by_repo[repo]
+          if pulls
+            pr = pulls.sample
             title, user, url = pr["title"], pr["user"]["login"], pr["pull_request"]["html_url"]
             chat.reply "_#{title}_ - #{user} \n    #{url}"
           else
-            chat.reply "No pull requests need reviews right now!"
+            chat.reply "No pull requests need a review right now!"
           end
         else
           chat.reply("I'm not configured for a repo with that name.")
