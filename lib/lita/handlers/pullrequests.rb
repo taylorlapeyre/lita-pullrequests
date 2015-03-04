@@ -1,3 +1,5 @@
+require "rufus-scheduler"
+
 module Lita
   module Handlers
     class Pullrequests < Handler
@@ -5,6 +7,11 @@ module Lita
       config :repo,         type: String, required: true
       config :review_label, type: String, required: false
       config :merge_label,  type: String, required: false
+
+      on :loaded, :remember_reminder
+
+      SCHEDULER = Rufus::Scheduler.new
+      REDIS_KEY = "pullrequests-cron"
 
       route(/^(pull request( me)?)|(give me something to review)$/, :get_random_pr, command: true, help: {
         "give me something to review" => "Shows you a random pull request that needs reviewing.",
@@ -15,20 +22,23 @@ module Lita
         "(summarize|all) pull requests" => "Lists all pull requests that need action."
       })
 
+      route(/^set pull requests reminder for (.*)$/, :set_reminder, command: true, help: {
+        "set pull requests reminder for CRON EXPRESSION" => "Sets a cron task that will trigger a pr summary."
+      })
 
-      # Helper method
-      def truncate(str, truncate_at, options = {})
-        return str unless str.length > truncate_at
+      def remember_reminder(payload)
+        reminder = redis.hgetall(REDIS_KEY)["reminder-info"]
+        if reminder
+          info = MultiJson.load(reminder)
+          job  = SCHEDULER.cron info["cron_expression"] do |job|
+            target = Source.new(user: info["u_id"], room: info["room"])
+            robot.send_messages(target, formatted_pull_request_summary)
+          end
 
-        omission = options[:omission] || '...'
-        length_with_room_for_omission = truncate_at - omission.length
-        stop = if options[:separator]
-           str.rindex(options[:separator], length_with_room_for_omission) || length_with_room_for_omission
+          log.info "Created cron job: #{info['cron_expression']}."
         else
-          length_with_room_for_omission
+          log.info "no reminder found."
         end
-
-        "#{str[0, stop]}#{omission}"
       end
 
       def fetch_pull_requests
@@ -41,15 +51,8 @@ module Lita
       def get_random_pr(chat)
         pr = pulls_that_need_reviews.sample
         if pr
-          title, user, body = pr["title"], pr["user"]["login"], truncate(pr["body"], 200)
-          url = pr["pull_request"]["html_url"]
-
-          chat.reply %Q(
-  #{title} - #{user}
-  #{url}
-  -------------------
-  #{body}
-)
+          title, user, url = pr["title"], pr["user"]["login"], pr["pull_request"]["html_url"]
+          chat.reply "_#{title}_ - #{user} \n    #{url}"
         else
           chat.reply "No pull requests need reviews right now!"
         end
@@ -73,7 +76,7 @@ module Lita
         end
       end
 
-      def list_all_pull_requests(chat)
+      def formatted_pull_request_summary
         response = ":heavy_exclamation_mark: *Pull Requests that need review*:\n"
 
         response += pulls_that_need_reviews.map do |pr|
@@ -89,8 +92,27 @@ module Lita
           url = pr["pull_request"]["html_url"]
           "- _#{title}_ - #{user} \n    #{url}"
         end.join("\n\n")
+      end
 
-        chat.reply(response)
+      def list_all_pull_requests(chat)
+        chat.reply(formatted_pull_request_summary)
+      end
+
+      def set_reminder(chat)
+        input = chat.matches[0][0].split(" ")
+        cron_expression = input[0..4].join(" ")
+        job = SCHEDULER.cron cron_expression do |job|
+          list_all_pull_requests(chat)
+        end
+
+        redis.hset(REDIS_KEY, "reminder-info", {
+          :cron_expression => cron_expression,
+          :j_id => job,
+          :u_id => chat.message.source.user.id,
+          :room => chat.message.source.room
+        }.to_json)
+
+        chat.reply("I will post a pull request summary according to this cron: #{cron_expression}")
       end
     end
 
