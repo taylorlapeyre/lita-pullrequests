@@ -6,6 +6,7 @@ describe Lita::Handlers::Pullrequests, lita_handler: true do
     Lita.config.handlers.pullrequests.repos        = ["taylorlapeyre/lita-pullrequests"]
     Lita.config.handlers.pullrequests.review_label = "Needs Review"
     Lita.config.handlers.pullrequests.merge_label  = "Ready To Merge"
+    Lita.config.handlers.pullrequests.qa_label     = "QA Needed"
   end
 
   it { is_expected.to route_command("give me something to review for lita-pullrequests").to(:get_random_pr) }

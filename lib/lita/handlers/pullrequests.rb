@@ -7,6 +7,7 @@ module Lita
       config :repos,        type: Array,  required: true
       config :review_label, type: String, required: false
       config :merge_label,  type: String, required: false
+      config :qa_label,     type: String, required: false
 
       on :loaded, :remember_reminder
 
@@ -71,7 +72,7 @@ module Lita
             chat.reply "No pull requests need a review right now!"
           end
         else
-          chat.reply("I'm not configured for a repo with that name.")
+          chat.reply "I'm not configured for a repo with that name."
         end
       end
 
@@ -93,21 +94,28 @@ module Lita
         end
       end
 
+      def pulls_that_need_qa
+        pulls = fetch_pull_requests
+        merge_label = config.qa_label || "QA Needed"
+
+        pulls.select do |pr|
+          pr["labels"] && pr["labels"].any? { |label| label["name"] == config.qa_label }
+        end
+      end
+
       def formatted_pull_request_summary
-        response = ":heavy_exclamation_mark: *Pull Requests that need review*:\n"
-
-        response += pulls_that_need_reviews.map do |pr|
-          title, user = pr["title"], pr["user"]["login"]
-          url = pr["pull_request"]["html_url"]
-          "- _#{title}_ - #{user} \n    #{url}"
-        end.join("\n\n")
-
-        response += "\n\n\n:white_check_mark: *Pull Requests that are ready for merging*:\n"
-
-        response += pulls_that_need_merging.map do |pr|
-          title, user = pr["title"], pr["user"]["login"]
-          url = pr["pull_request"]["html_url"]
-          "- _#{title}_ - #{user} \n    #{url}"
+        {
+          ":heavy_exclamation_mark: *Pull Requests that need review*:\n"     => pulls_that_need_reviews,
+          ":thought_balloon: *Pull Requests that need QA*:\n"                => pulls_that_need_qa,
+          ":white_check_mark: *Pull Requests that are ready for merging*:\n" => pulls_that_need_merging
+        }.map do |heading, pulls|
+          heading + if pulls.any?
+            pulls.map do |pr|
+              "- _#{pr['title']}_ - #{pr['user']['login']} \n    #{pr['pull_request']['html_url']}"
+            end.join("\n\n")
+          else
+            "_None!_\n"
+          end
         end.join("\n\n")
       end
 
