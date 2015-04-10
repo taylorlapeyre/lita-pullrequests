@@ -17,9 +17,9 @@ gem "lita-pullrequests"
 
 Pull request summaries include three sections:
 
-1. Pull Requests that need a code review
-2. Pull Requests that are ready to be merged
-3. Pull Requests that need quality assurance
+1. :heavy_exclamation_mark: Pull Requests that need a code review
+2. :thought_balloon: Pull Requests that need quality assurance
+3. :white_check_mark: Pull Requests that are ready to be merged
 
 These are sorted based on GitHub labels attached to pull requests. You can configure your labels in your `lita_config`.
 
