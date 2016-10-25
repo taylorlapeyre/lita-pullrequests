@@ -112,7 +112,7 @@ module Lita
           heading + if pulls.any?
             pulls.map do |pr|
               msg = "- _#{pr['title']}_ - #{pr['user']['login']} \n    #{pr['pull_request']['html_url']}"
-              msg << "\n#{pr['assignees'].collect{|a| a[:login]}.join(',')}" unless pr['assignees'].empty?
+              msg << "\n:point_right: #{pr['assignees'].collect {|a| a['login']}.join(',')}" unless pr['assignees'].empty?
               msg
             end.join("\n\n")
           else
